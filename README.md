@@ -11,7 +11,7 @@ Code associated with Phillips et al.
 
 5. seaturtle_mtDNA_longfragment_alm_final_25Jan22.nex: input nexus file for MrBayes
 
-6. infile.nex.con.tre: MrBayes output consensus tree and input for phylogeny.R!
+6. infile.nex.con.tre: MrBayes output consensus tree and input for phylogeny.R
 
 7. 13Mar22_mtDNA_HKY_100mill.xml: beauti xlm file with priors specified; use as input to BEAST2
 
