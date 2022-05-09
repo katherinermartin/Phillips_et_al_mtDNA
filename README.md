@@ -3,7 +3,7 @@ Code associated with Phillips et al.
 
 1. phylogeny.R: script to generate all phylogeny figures in text and supplement.
 
-2. all_haps_places_stages_31Mar22.csv: dataframe of haplotypes and their associated ocean basins and life stages; for input to phylogeny.R
+2. all_haps_places_stages_31Mar22.csv: dataframe of global long-fragment mtDNA haplotypes from all seven extant sea turtle species and associated ocean basins and life stages where each haplotype has been found; for input to phylogeny.R
 
 3. seaturtle_mtDNA_longfragment_raw_alm_clustal.fasta: unedited alignment of haplotypes generated with Clustal Omega
 
