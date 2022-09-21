@@ -11,7 +11,7 @@ library(emojifont) # for triangles on beast tree
 
 setwd("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/phylo_render/")
 
-df <- read.csv("all_haps_places_stages_31Mar22.csv")
+df <- read.csv("all_haps_places_stages_25May22_final.csv")
 
 # make the haplotype column the name of the rows
 df <- df %>% remove_rownames %>% column_to_rownames(var="haplotype")
@@ -22,34 +22,35 @@ df <- df %>% mutate_at("Atlantic", str_replace, "1", "Atlantic")
 df <- df %>% mutate_at("IndoPacific", str_replace, "1", "IndoPacific")
 df <- df %>% mutate_at("Mediterranean", str_replace, "1", "Mediterranean")
 
+# rename column
+df <- rename(df, `Post-dispersal_juveniles` = `Post.dispersal_juveniles`)
+
 # remove underscore from columns
 
 df <- df %>%
   rename_with(~ gsub('_', ' ', .x))
 
-# rename oceanic juveniles to dispersal stage juveniles
-df <- rename(df, "dispersal-stage juveniles" = "oceanic juveniles")
 
 # replace any time there is a record with a '1'
 
-df <- df %>% mutate_at("dispersal-stage juveniles", str_replace, "1", "dispersal-stage juveniles")
-df <- df %>% mutate_at("inwater juveniles", str_replace, "1", "inwater juveniles")
-df <- df %>% mutate_at("rookery", str_replace, "1", "rookery")
-df <- df %>% mutate_at("inwater adults", str_replace, "1", "inwater adults")
-df <- df %>% mutate_at("inwater juveniles and adults", str_replace, "1", "inwater juveniles and adults")
+df <- df %>% mutate_at("Dispersing juveniles", str_replace, "1", "Dispersing juveniles")
+df <- df %>% mutate_at("Post-dispersal juveniles", str_replace, "1", "Post-dispersal juveniles")
+df <- df %>% mutate_at("Rookery", str_replace, "1", "Rookery")
+df <- df %>% mutate_at("Inwater adults", str_replace, "1", "Inwater adults")
+df <- df %>% mutate_at("Mixed juveniles and inwater adults", str_replace, "1", "Mixed juveniles and inwater adults")
 
 
 # make all zeroes NAs in the dataframe
 df[df == 0] <- NA
 
 
-lifestages <- df %>% select(c("dispersal-stage juveniles", "inwater juveniles", "inwater juveniles and adults", "inwater adults", "rookery"))
+lifestages <- df %>% select(c("Dispersing juveniles", "Post-dispersal juveniles", "Mixed juveniles and inwater adults", "Inwater adults", "Rookery"))
 
 
 basins <- df %>% select(c("Atlantic", "Mediterranean", "IndoPacific"))
 
-tree <- read.mrbayes("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/MrBayes/less_freq_sampling/25 Jan 22 corrected mtdna; mtDNA long frag bayes 27Jan22/CIPRES/infile.nex.con.tre")
-tree # this has 716 tips.
+tree <- read.mrbayes("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/MrBayes/less_freq_sampling/11May2022/MrBayes long fragment mtDNA/infile.nex.con.tre")
+tree # this has 709 tips.
 
 # drop the outgroup tips:
 tree <- treeio::drop.tip(tree, c("EF071948.1_trimmed", "EF122793.1_trimmed"))
@@ -63,16 +64,18 @@ p1 <- ggtree(tree, # tree read in
                  linesize=1,
                  offset=4)
 
+#p1 <- p1 + geom_text(aes(label=node), hjust=-.3) # add only if node labels desired
 
-p2_rotated <- ggtree::rotate(p1, 715) %>% # rotate Dc to bottom
-  ggtree::rotate(716) %>% # rotate Dc about its axis
-  ggtree::rotate(749) %>% # rotate Cm+Nd down
-  ggtree::rotate(1091) %>% # rotate Ei down
-  ggtree::rotate(1092) %>% # rotate Ei about its axis
-  ggtree::rotate(1249) %>% # rotate Cc down
-  ggtree::rotate(1250) %>% # rotate Lk down
-  ggtree::rotate(1251) %>% # rotate Lk about its axis
-  ggtree::rotate(1260) # rotate Lo about its axis
+
+p2_rotated <- ggtree::rotate(p1, 708) %>% # rotate Dc to bottom
+  ggtree::rotate(710) %>% # rotate Dc about its axis
+  ggtree::rotate(735) %>% # rotate Cm+Nd down
+  ggtree::rotate(1075) %>% # rotate Ei + Cc + Lo + lk
+  ggtree::rotate(1076) %>% # rotate Ei about its axis
+  ggtree::rotate(1233) %>% # rotate Cc + Lk + Lo
+  ggtree::rotate(1234) %>% # rotate Lo + Lk
+  ggtree::rotate(1235) %>% # rotate Lk about its axis
+  ggtree::rotate(1244) # rotate Lo about its axis
 
 p2_rotated
 
@@ -110,28 +113,23 @@ large_phylo_heatmap <- gheatmap(p4, # previous tree to use
                                 font.size = 1, # font size for labels
                                 colnames_position = "top", # If there were column labels, where they'd be
                                 colnames = FALSE, colnames_offset_y = 1) + # column names
-  scale_fill_manual(values = c("dispersal-stage juveniles" = "#fa8116",
-                               "inwater juveniles" = "#e16462",
-                               "inwater juveniles and adults" = "#b12a90",
-                               "inwater adults" = "#5c01a6",
-                               "rookery" = "#0b076f"),
+  scale_fill_manual(values = c("Dispersing juveniles" = "#fa8116",
+                               "Post-dispersal juveniles" = "#e16462",
+                               "Mixed juveniles and inwater adults" = "#b12a90",
+                               "Inwater adults" = "#5c01a6",
+                               "Rookery" = "#0b076f"),
                     na.value = "white", name = "life stage")
-# dispersal-stage juveniles: fca636, fb9004
-# rookery:0d0887
-# inwater: e16462
-
 
 large_phylo_heatmap
-# plasma colors from viridis package; could try going a little darker monochromatically.
-# switch colnames = FALSE to = 45 if I want them there.
 
-#ggsave("figures/figure_phylo_mrbayes_19April22.svg")
+
+ggsave("figures/MrBayes/figure_phylo_mrbayes_01Sept22.svg")
 
 
 ### Zoom in on specific parts of tree for species-level phylogeny
 
-tree <- read.mrbayes("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/MrBayes/less_freq_sampling/25 Jan 22 corrected mtdna; mtDNA long frag bayes 27Jan22/CIPRES/infile.nex.con.tre")
-tree # this has 716 tips.
+tree <- read.mrbayes("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/MrBayes/less_freq_sampling/11May2022/MrBayes long fragment mtDNA/infile.nex.con.tre")
+tree # this has 709 tips.
 
 # drop the outgroup tips:
 tree <- treeio::drop.tip(tree, c("EF071948.1_trimmed", "EF122793.1_trimmed"))
@@ -193,178 +191,139 @@ p9 <- gheatmap(p8,
                offset=0.1,
                width=0.5, # offset = how close 2 matrices are; width = width of bins
                font.size = 1, colnames_position = "top", colnames = FALSE, colnames_offset_y = 1) +
-  scale_fill_manual(values = c("dispersal-stage juveniles" = "#fa8116",
-                               "inwater juveniles" = "#e16462",
-                               "inwater juveniles and adults" = "#b12a90",
-                               "inwater adults" = "#5c01a6",
-                               "rookery" = "#0b076f"),
+  scale_fill_manual(values = c("Dispersing juveniles" = "#fa8116",
+                               "Post-dispersal juveniles" = "#e16462",
+                               "Mixed juveniles and inwater adults" = "#b12a90",
+                               "Inwater adults" = "#5c01a6",
+                               "Rookery" = "#0b076f"),
                     na.value = "white", name = "life stage")
 p9
 # annotate a phylogenetic tree with insets: https://guangchuangyu.github.io/2016/01/annotate-a-phylogenetic-tree-with-insets/
 
-phylo_Dc <- viewClade(p9, MRCA(p9, "Dc1.4", "Dc10.1"))
+phylo_Dc <- viewClade(p9, MRCA(p9, "Dc12.1", "Dc1.2"))
 phylo_Dc
-#ggsave("figures/phylo_Dc_19Apr22.svg")
+ggsave("figures/phylo_Dc_25May22.svg")
 
-phylo_Ei <- viewClade(p9, MRCA(p9, "EiIP_14", "Moz114"))
+phylo_Ei <- viewClade(p9, MRCA(p9, "EiIP_14", "EiIP_49"))
 phylo_Ei
-#ggsave("figures/phylo_Ei_19Apr22.svg")
+ggsave("figures/phylo_Ei_25May22.svg")
 
-phylo_Lk <- viewClade(p9, MRCA(p9, "Lk1.1", "Lk7.1"))
+phylo_Lk <- viewClade(p9, MRCA(p9, "Lk1.1", "Lk3.1"))
 phylo_Lk
-#ggsave("figures/phylo_Lk_19Apr22.svg")
+ggsave("figures/phylo_Lk_25May22.svg")
 
-phylo_Lo <- viewClade(p9, MRCA(p9, "Lo50", "Lo100"))
+phylo_Lo <- viewClade(p9, MRCA(p9, "Lo50", "Lo20"))
 phylo_Lo
-#ggsave("figures/phylo_Lo_19Apr22.svg")
+ggsave("figures/phylo_Lo_25May22.svg")
 
-phylo_Cc <- viewClade(p9, MRCA(p9, "CcA4.3", "CcA65.1"))
+phylo_Cc <- viewClade(p9, MRCA(p9, "CcA4.3", "CcA66.1"))
 phylo_Cc
-#ggsave("figures/phylo_Cc_19Apr22.svg")
+ggsave("figures/phylo_Cc_25May22.svg")
 
-phylo_Nd <- viewClade(p9, MRCA(p9, "Nd05", "Nd14"))
+phylo_Nd <- viewClade(p9, MRCA(p9, "Nd01", "Nd32"))
 phylo_Nd
-#ggsave("figures/phylo_Nd_19Apr22.svg")
+ggsave("figures/phylo_Nd_25May22.svg")
 
-phylo_Cm <- viewClade(p9, MRCA(p9, "CmP152.1", "CmA38.1"))
+phylo_Cm <- viewClade(p9, MRCA(p9, "CmA1.1", "JF926556.1"))
 phylo_Cm
-#ggsave("figures/phylo_Cm_19Apr22.svg")
+ggsave("figures/phylo_Cm_25May22.svg")
 
-
-
+###### GDS
 #### BEAST2 tree
 
-tree <- read.beast("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/BEAST_beauti/treeannotator/13Mar22 treeannotator low mem/15Mar22_lowmem_treeannotator.tre")
+tree <- read.beast("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/BEAST_beauti/July2022_newfossils/Run2_StrictClock_Yule_UniformFossil/treeannotator/treeannotator Yule uniform run 2/run2_treeannotator_Yule_uniform.txt")
 
-tree #716 tips as expected; don't drop outgroups this time
+p <- ggtree(tree) 
 
-# Initialize tree: tree aesthetics
-p1 <- ggtree(tree, # tree read in
-             ladderize = TRUE,
-             right = TRUE, 
-             size = 0.25)
-p1
-
-# rotate the clades to match previous phylo topology in literature
-p1_rotated <- ggtree::rotate(p1, 717) %>% # rotate outgroups down
-  ggtree::rotate(719) %>% # rotate Cm+Nd down
-  ggtree::rotate(1067) %>% # rotate Ei
-  ggtree::rotate(1068) %>% # rotate Cc down
-  ggtree::rotate(1106) %>% # rotate Cc IA up
-  ggtree::rotate(1172) %>% # rotate Lk down
-  ggtree::rotate(1173) %>% # rotate Lo Indo up
-  ggtree::rotate(1175) %>% #rotate Lo Atl/Pac down
-  ggtree::rotate(721) # rotate Cm clades
-p1_rotated
-
-## collapse the nodes
+p1_rotated <- ggtree::rotate(p, 712) %>% # rotate Cm down next to Dc
+  ggtree::rotate(1060) %>% # rotate Ei above Cm
+  ggtree::rotate(1061) %>% # rotate Cc above Ei
+  ggtree::rotate(1165) %>% # rotate Lo up
+  ggtree::rotate(1166) # rotate Lo Indian Ocean clade to top
 
 p1_collapsed <- p1_rotated %>%
-  ggtree::collapse(node=1431) %>% # collapse outgroups
-  ggtree::collapse(node=1398) %>% # collapse Dc
-  ggtree::collapse(node=1036) %>% # collapse Nd
-  ggtree::collapse(node=1241) %>% # collapse Ei
-  ggtree::collapse(node=1232) %>% # collapse Lk
-  ggtree::collapse(node=722) %>% # collapse Cm Group 1/clade I and II
-  ggtree::collapse(node=816) %>% # collapse Cm group 2/III-XI
-  ggtree::collapse(node=1070) %>% # collapse Cc Atlantic Group 1/clade IB
-  ggtree::collapse(node=1106) %>% # collapse Cc Atlantic Group 2/clade II
-  ggtree::collapse(node=1160) %>% # collapse Cc Pacific Group/clade IA
-  ggtree::collapse(node=1228) %>% # collapse Lo indo group/Indian ocean clade
-  ggtree::collapse(node=1213) %>% # collapse Lo Pacific/Australia and E. pacific clade
-  ggtree::collapse(node=1175) # collapse all other Lo/Atlantic and Pacific
-p1_collapsed
+  ggtree::collapse(node=1234) %>% # collapse Ei
+  ggtree::collapse(node=1225) %>% # collapse Lk
+  ggtree::collapse(node=715) %>% # collapse Cm Group 1/clade I and II
+  ggtree::collapse(node=809) %>% # collapse Cm group 2/III-XI
+  ggtree::collapse(node=1063) %>% # collapse Cc Atlantic Group 1/clade IB
+  ggtree::collapse(node=1099) %>% # collapse Cc Atlantic Group 2/clade II
+  ggtree::collapse(node=1153) %>% # collapse Cc Pacific Group/clade IA
+  ggtree::collapse(node=1221) %>% # collapse Lo indo group/Indian ocean clade
+  ggtree::collapse(node=1206) %>% # collapse Lo Pacific/Australia and E. pacific clade
+  ggtree::collapse(node=1168) %>% # collapse Lo Atlantic/Pacific clade
+  ggtree::collapse(node=1391) %>% # collapse Dc
+  ggtree::collapse(node=1029) %>% # collapse Nd
+  ggtree::collapse(node=1417) # collapse outgroup
 
-
-#### Add triangles manually
 
 p1_collapsed_triangle <- p1_collapsed +
-  geom_text2(aes(subset=(node == 1431)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust=.42) +
-  geom_text2(aes(subset=(node == 1398)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1036)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1241)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1232)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 722)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 816)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1070)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1106)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1160)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1228)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1213)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
-  geom_text2(aes(subset=(node == 1175)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42)
-
+  geom_text2(aes(subset=(node == 1234)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust=.42) +
+  geom_text2(aes(subset=(node == 1225)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 715)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 809)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1063)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1099)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1153)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1221)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1206)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1168)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1391)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1029)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42) +
+  geom_text2(aes(subset=(node == 1417)), cex=15, alpha=0.2,label=intToUtf8(9668), hjust =.2,vjust = 0.42)
 p1_collapsed_triangle
 
-# label the tree nodes
-p1_collapsed_labeled <- p1_collapsed_triangle +
-  geom_cladelabel(node=1431, "outgroups", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1398, "D. coriacea", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1036, "N. depressus", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1241, "E. imbricata", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1232, "L. kempii", fontsize = 3,hjust = -0.5) +
-  geom_cladelabel(node=722, "C. mydas clades I & II", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=816, "C. mydas clades III-XI", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1070, "C. caretta clade IB", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1106, "C. caretta clade II", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1160, "C. caretta clade IA", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1228, "L. olivacea Indian Ocean clade", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1213, "L. olivacea Australia and E. Pacific clade", fontsize = 3, hjust = -0.5) +
-  geom_cladelabel(node=1175, "L. olivacea Atlantic and Pacific clade", fontsize = 3, hjust = -0.5)
-
 # tree with internal nodes colored by posterior probability
-p2 <- p1_collapsed_triangle + # previous tree
+p2 <- p1_collapsed_triangle + # previous tree with triangles
   geom_nodepoint(color = "black", # node border
                  fill = "#000000", # node fill
                  aes(subset = posterior >= 0.999), # aesthetics: subset those with a probability greater than or equal to 0.999
-                 size = 0.5, # size of nodes
+                 size = 1.5, # size of nodes
                  shape = 21) # shape of nodes (circle)
 p2
 
 # put some color on the ranges
-p3 <- p2 + geom_range("CAheight_0.95_HPD", color = "#0000FF", size = 3, alpha = 0.4)
+p3 <- p2 + geom_range("CAheight_0.95_HPD", color = "#0000FF", size = 3, alpha = 0.2)
 p3
 
-# add the confidence intervals around height; I have tried so hard to round these numbers here but will have to do post-hoc in InkScape/Illustrator
-p4 <- p3 + geom_text(aes(x=branch, label=CAheight_0.95_HPD), vjust = -1.5, hjust = 0.5, color='black', size = 2)
-p4
-
-p5 <- revts(p4) + theme_tree2() # theme_tree2 is needed for the revts
+#Time-Scale bar
+p5 <- revts(p3) + theme_tree2() # theme_tree2 is needed for the revts
 p5
 
-p6 <- p5 + scale_x_continuous(breaks=c(-150, -125, -100, -75, -50, -25, -10, -5, 0), labels = abs)
-p6
-
-# another option: p5 <- revts(p4) + theme_tree2() + scale_x_continuous(labels = abs)
-
-#ggsave("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/phylo_render/figures/beast/beast_9Apr22.svg")
+ggsave(filename = "new_Beast_plot_Run2_wide.svg", plot = p5, width = 12, height = 8)
 
 # Maximum likelihood tree
 
-ml_mtdna <- read.tree("../../analysis/IQtree_29Apr22/seaturtle_mtDNA_longfragment_alm_final_25Jan22.fasta.treefile")
+ml_mtdna <- read.tree("../IQTree_11May22/seaturtle_mtDNA_longfragment_alm.fasta.treefile")
 
 # drop the outgroup tips:
 ml_mtdna <- treeio::drop.tip(ml_mtdna, c("EF071948.1_trimmed", "EF122793.1_trimmed"))
 
 # Initialize tree: tree aesthetics
-ml_mtdna <- ggtree(ml_mtdna,
+ml_p1 <- ggtree(ml_mtdna,
                    ladderize = TRUE,
                    right = TRUE, 
                    size = 0.25) + 
   geom_treescale(fontsize=2,
                  linesize=1,
                  offset=4)
+#ml_p1 <- ml_p1 + geom_text(aes(label=node), hjust=-.3, size = 2) # add only if node labels desired
+ml_p1
 
 # rotate nodes to match previous presentations
-ml_mtdna_rotated <- ggtree::rotate(ml_mtdna, 715) %>% # rotate Dc to bottom
-  ggtree::rotate(716) %>% # rotate Dc about its axis
-  ggtree::rotate(749) %>% # rotate Cm+Nd down
-  ggtree::rotate(1097) %>% # rotate Ei down
-  ggtree::rotate(1098) %>% # rotate Ei about its axis
-  ggtree::rotate(1255) %>% # rotate Cc down
-  ggtree::rotate(1256) %>% # rotate Lk down
-  ggtree::rotate(1266) %>% # rotate Lo about its axis
-  ggtree::rotate(1257) # rotate Lk about its axis
-ml_mtdna_rotated <- ml_mtdna_rotated + geom_tiplab(size = 0.5)
+ml_p1_rotated <- ggtree::rotate(ml_p1, 708) %>% # rotate Dc to bottom
+  ggtree::rotate(735) %>% # rotate Chelonidae
+  ggtree::rotate(1083) %>% # rotate Ei + Cc + Lo + Lk
+  ggtree::rotate(1241) %>% # rotate Cc + Lo + Lk
+  ggtree::rotate(1242) %>% # rotate Lo + Lk
+  ggtree::rotate(1084) %>% # rotate Ei about its axis
+  ggtree::rotate(1252) %>% # rotate Lo about its axis
+  ggtree::rotate(1243) %>% # rotate Lk about its axis
+  ggtree::rotate(709) # rotate Dc about axis
+
+ml_p1_rotated
+
+ml_mtdna_rotated <- ml_p1_rotated + geom_tiplab(size = 0.5) # add tip labels
 ml_mtdna_rotated
 
 ML_mtdna_plot <- ml_mtdna_rotated +
@@ -374,5 +333,4 @@ ML_mtdna_plot <- ml_mtdna_rotated +
   geom_nodepoint(color = "black", fill = "#cccccc", aes(subset = label < 79.5 & label >= 70), size = 1, shape = 21) # bootstrap between 70 and 80
 ML_mtdna_plot # bootstrap labels above 90 labeled with solid black dot
 
-
-#ggsave(filename = "../analysis/phylo_render/figures/ML_mtdna_plot.svg", plot = ML_mtdna_plot)
+ggsave(filename = "../phylo_render/figures/ML_tree/figure_phylo_IQtree_21May22.svg", plot = ML_mtdna_plot)
