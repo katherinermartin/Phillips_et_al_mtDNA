@@ -15,7 +15,7 @@ Code associated with Phillips et al.
 
 7. run2_mtDNA_Strict_Yule_uniform.xml: beauti xlm file with priors specified; use as input to BEAST2
 
-8. run2_seaturtle_mtDNA_longfragment_alm.trees: treeannotator output, input for phylogeny.R
+8. run2_seaturtle_mtDNA_longfragment_alm.trees: treeannotator output, input for phylogeny.R * available upon request; file too large for GitHub upload*
 
 9. run2_treeannotator_Yule_uniform.txt: output from BEAST2, use as input for TreeAnnotator.
 
