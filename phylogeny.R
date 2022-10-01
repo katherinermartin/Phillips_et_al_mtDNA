@@ -9,8 +9,6 @@ library(ggnewscale) # for heatmap
 library(picante) # for various phylo functions
 library(emojifont) # for triangles on beast tree
 
-setwd("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/phylo_render/")
-
 df <- read.csv("all_haps_places_stages_25May22_final.csv")
 
 # make the haplotype column the name of the rows
@@ -49,7 +47,7 @@ lifestages <- df %>% select(c("Dispersing juveniles", "Post-dispersal juveniles"
 
 basins <- df %>% select(c("Atlantic", "Mediterranean", "IndoPacific"))
 
-tree <- read.mrbayes("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/MrBayes/less_freq_sampling/11May2022/MrBayes long fragment mtDNA/infile.nex.con.tre")
+tree <- read.mrbayes("infile.nex.con.tre")
 tree # this has 709 tips.
 
 # drop the outgroup tips:
@@ -128,7 +126,7 @@ ggsave("figures/MrBayes/figure_phylo_mrbayes_01Sept22.svg")
 
 ### Zoom in on specific parts of tree for species-level phylogeny
 
-tree <- read.mrbayes("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/MrBayes/less_freq_sampling/11May2022/MrBayes long fragment mtDNA/infile.nex.con.tre")
+tree <- read.mrbayes("infile.nex.con.tre")
 tree # this has 709 tips.
 
 # drop the outgroup tips:
@@ -228,10 +226,9 @@ phylo_Cm <- viewClade(p9, MRCA(p9, "CmA1.1", "JF926556.1"))
 phylo_Cm
 ggsave("figures/phylo_Cm_25May22.svg")
 
-###### GDS
 #### BEAST2 tree
 
-tree <- read.beast("/Users/KatieMartin/Documents/UCF/Research/mtDNA_longfragment/analysis/BEAST_beauti/July2022_newfossils/Run2_StrictClock_Yule_UniformFossil/treeannotator/treeannotator Yule uniform run 2/run2_treeannotator_Yule_uniform.txt")
+tree <- read.beast("run2_treeannotator_Yule_uniform.txt")
 
 p <- ggtree(tree) 
 
@@ -294,7 +291,7 @@ ggsave(filename = "new_Beast_plot_Run2_wide.svg", plot = p5, width = 12, height 
 
 # Maximum likelihood tree
 
-ml_mtdna <- read.tree("../IQTree_11May22/seaturtle_mtDNA_longfragment_alm.fasta.treefile")
+ml_mtdna <- read.tree("seaturtle_mtDNA_longfragment_alm.fasta.treefile")
 
 # drop the outgroup tips:
 ml_mtdna <- treeio::drop.tip(ml_mtdna, c("EF071948.1_trimmed", "EF122793.1_trimmed"))
@@ -333,4 +330,4 @@ ML_mtdna_plot <- ml_mtdna_rotated +
   geom_nodepoint(color = "black", fill = "#cccccc", aes(subset = label < 79.5 & label >= 70), size = 1, shape = 21) # bootstrap between 70 and 80
 ML_mtdna_plot # bootstrap labels above 90 labeled with solid black dot
 
-ggsave(filename = "../phylo_render/figures/ML_tree/figure_phylo_IQtree_21May22.svg", plot = ML_mtdna_plot)
+ggsave(filename = "figure_phylo_IQtree_21May22.svg", plot = ML_mtdna_plot)
