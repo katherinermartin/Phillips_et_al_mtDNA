@@ -1,5 +1,6 @@
 # Phillips_et_al_mtDNA
-Code associated with Phillips et al.
+Code associated with Phillips et al. 2022, https://doi.org/10.1002/ece3.9426
+
 
 1. phylogeny.R: script to generate all phylogeny figures in text and supplement.
 
